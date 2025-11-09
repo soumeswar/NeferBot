@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 import requests
 from datetime import datetime, timedelta
+from threading import Timer
+from io import BytesIO
 
 load_dotenv()
 
@@ -20,6 +22,7 @@ except:
     client.dump_settings("session.json")
 
 processed_messages = set()
+temp_files = {}
 
 def generate_ai_response_text(prompt: str) -> str:
     try:
@@ -28,8 +31,28 @@ def generate_ai_response_text(prompt: str) -> str:
         response.raise_for_status()
         return response.text.strip()
     except Exception as e:
-        print(f"⚠️ AI request failed: {e}")
+        print(f"⚠️ AI text request failed: {e}")
         return "Sorry, I couldn't get a reply right now."
+
+def generate_ai_image(prompt: str):
+    try:
+        url = f"https://image.pollinations.ai/prompt/{prompt}"
+        response = requests.get(url, timeout=20)
+        if response.status_code == 200:
+            return BytesIO(response.content)
+        else:
+            print(f"⚠️ Image request failed: {response.status_code}")
+            return None
+    except Exception as e:
+        print(f"⚠️ AI image request failed: {e}")
+        return None
+
+def schedule_delete(key):
+    def delete_file():
+        if key in temp_files:
+            del temp_files[key]
+            print(f"🧹 Image buffer {key} auto-deleted after 1 minute.")
+    Timer(60, delete_file).start()
 
 def handle_message(msg, thread_id: str):
     text = msg.text.strip()
@@ -37,14 +60,33 @@ def handle_message(msg, thread_id: str):
         return
     processed_messages.add(msg.id)
     print(f"💬 Mentioned Prompt: {text}")
-    ai_reply = generate_ai_response_text(text)
-    print(f"🤖 Reply: {ai_reply[:80]}...")
-    try:
-        client.direct_send(ai_reply, thread_ids=[thread_id])
-    except Exception as e:
-        print(f"⚠️ Error sending message: {e}")
 
-print("🤖 Nefer Bot is running (mention-based mode)...")
+    lower_text = text.lower()
+    if "imagine" in lower_text:
+        prompt = text.split("imagine", 1)[1].strip() or text
+        print(f"🖼️ Generating image for: {prompt}")
+        img_data = generate_ai_image(prompt)
+        if img_data:
+            key = f"img_{msg.id}"
+            temp_files[key] = img_data
+            try:
+                client.direct_send("", thread_ids=[thread_id], file=img_data)
+                print("✅ Image sent successfully.")
+                schedule_delete(key)
+            except Exception as e:
+                print(f"⚠️ Error sending image: {e}")
+                del temp_files[key]
+        else:
+            client.direct_send("Sorry, I couldn't generate that image.", thread_ids=[thread_id])
+    else:
+        ai_reply = generate_ai_response_text(text)
+        print(f"🤖 Reply: {ai_reply[:80]}...")
+        try:
+            client.direct_send(ai_reply, thread_ids=[thread_id])
+        except Exception as e:
+            print(f"⚠️ Error sending message: {e}")
+
+print("🤖 Nefer Bot is running (mention + imagine + auto-clean)...")
 
 while True:
     try:
