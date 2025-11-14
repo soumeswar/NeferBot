@@ -6,6 +6,6 @@ pyyaml
 flask_limiter
 aiohttp
 werkzeug
-psutil==6.0.0
+psutil
 gunicorn
 gevent
