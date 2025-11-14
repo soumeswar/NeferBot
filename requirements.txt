@@ -4,3 +4,8 @@ flask
 requests
 pyyaml
 flask_limiter
+aiohttp
+werkzeug
+psutil==6.0.0
+gunicorn
+gevent
