@@ -91,24 +91,6 @@ You own the keys — literally.
 
 ---
 
-## 🌐 QUICK START
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/yourname/neferbot.git
-cd neferbot
-
-# 2. Set environment variables
-echo "ADMIN_PASSWORD=rajdeepismybestfriend2025" >> .env
-echo "SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(32))')" >> .env
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Run the bot and Flask server together
-python main.py
-```
-
 **NOTE: THIS OPEN-SOURCE PROGRAM IS ONLY PROVIDED FOR EDUCATIONAL PURPOSES, I'M NOT RESPONSIBLE FOR FURTHER INSTAGRAM POLICY VIOLATIONS.**
 
 ## THANK YOU 💖 ~ ＳＯＵＭＥＳＷＡＲ 神
