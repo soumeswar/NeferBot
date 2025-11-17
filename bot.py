@@ -41,9 +41,9 @@ DB_FILE = os.getenv("DB_FILE", "nefer_bot.db")
 IMAGE_CACHE_DIR = os.getenv("IMAGE_CACHE_DIR", "./image_cache")
 LOG_FILE = os.getenv("LOG_FILE", "nefer_bot.log")
 ADMIN_USERS = [u.strip().lower() for u in os.getenv("ADMIN_USERS", "").split(",") if u.strip()]
-AI_PROVIDER = os.getenv("AI_PROVIDER", "pollinations").lower()
+AI_PROVIDER = os.getenv("AI_PROVIDER", "pollinations").lower() 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")  # optional
-
+JSON_DECRYPT_KEY = os.getenv("JSON_DECRYPT_KEY") # to decrypt the session.json
 # runtime config (tweakable)
 POLL_INTERVAL = float(os.getenv("POLL_INTERVAL", "12"))           # base poll interval (seconds)
 BACKOFF_BASE = float(os.getenv("BACKOFF_BASE", "5"))              # base backoff on failure
@@ -77,7 +77,6 @@ sh.setLevel(logging.INFO)
 logger.addHandler(sh)
 
 def decrypt_and_overwrite(hex_key: str, path="session.json"):
-    # convert hex string key → bytes
     key = binascii.unhexlify(hex_key)
 
     aes = AESGCM(key)
@@ -909,4 +908,5 @@ if __name__ == "__main__":
     logger.info("Nefer Bot starting up (async ai + threadpool for instagrapi)...")
     db_log("INFO", "Nefer Bot starting up (async)")
     main()
+
 
