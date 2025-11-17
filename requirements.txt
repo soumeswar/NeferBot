@@ -1,10 +1,11 @@
-instagrapi
 python-dotenv
-flask
-requests
-pyyaml
-flask_limiter
+cryptography
 aiohttp
+requests
+instagrapi
+PyYAML
+Flask
+flask-limiter
 werkzeug
 psutil
 gunicorn
