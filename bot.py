@@ -76,27 +76,31 @@ sh.setFormatter(fmt)
 sh.setLevel(logging.INFO)
 logger.addHandler(sh)
 
-def decrypt_and_overwrite(hex_key: str, path="session.json"):
-    key = binascii.unhexlify(hex_key)
-    aes = AESGCM(key)
-
+def decrypt_and_overwrite(password: str, path="session.json"):
     with open(path, "rb") as f:
         raw = f.read()
 
-    nonce = raw[:12]
-    ciphertext = raw[12:]
+    # layout: salt(16) + nonce(12) + ciphertext
+    salt = raw[:16]
+    nonce = raw[16:28]
+    ciphertext = raw[28:]
 
-    decrypted = aes.decrypt(nonce, ciphertext, None)
-    
-    decrypted_text = decrypted.decode("utf-8")
+    key = generate_key_from_password(password, salt)
+    aes = AESGCM(key)
 
+    decrypted_bytes = aes.decrypt(nonce, ciphertext, None)
+
+    # **convert bytes -> utf8 string**
+    decrypted_text = decrypted_bytes.decode("utf-8")
+
+    # **parse json**
     data = json.loads(decrypted_text)
 
+    # rewrite with UTF-8
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
     print("Decrypted and overwritten session.json ✔")
-
 
 
 # -------------------------
@@ -906,6 +910,7 @@ if __name__ == "__main__":
     logger.info("Nefer Bot starting up (async ai + threadpool for instagrapi)...")
     db_log("INFO", "Nefer Bot starting up (async)")
     main()
+
 
 
 
