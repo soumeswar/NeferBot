@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Nefer Bot — Async AI workers (aiohttp) + instagrapi sync calls in threadpool.
+Johan Bot — Async AI workers (aiohttp) + instagrapi sync calls in threadpool.
 All original features preserved. AI calls converted to async (aiohttp)
 to avoid blocking the event loop. Polling is async and instagrapi calls are
 executed in a ThreadPoolExecutor.
@@ -26,7 +26,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 import sys
 import binascii
 import aiohttp
-import requests  # still used in a few places, preserved
+import requests
 from instagrapi import Client
 
 # -------------------------
@@ -216,7 +216,6 @@ async def ai_text_generate_async(prompt, timeout=20):
                     return j["choices"][0]["message"]["content"].strip()
         except Exception as e:
             logger.warning("OpenAI async failed, falling back: %s", e)
-    # Pollinations text fallback (async GET)
     try:
         url = f"https://text.pollinations.ai/{aiohttp.helpers.quote(prompt, safe='')}"
         async with aiohttp.ClientSession() as session:
@@ -907,6 +906,7 @@ if __name__ == "__main__":
     logger.info("Nefer Bot starting up (async ai + threadpool for instagrapi)...")
     db_log("INFO", "Nefer Bot starting up (async)")
     main()
+
 
 
 
